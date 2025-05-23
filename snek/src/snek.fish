@@ -1,9 +1,22 @@
 #!/usr/bin/env fish
 
-# Source required files
-source (dirname (status filename))/engine/game_loop.fish
-source (dirname (status filename))/ui/renderer.fish
-source (dirname (status filename))/ui/input.fish
+# 🌟 Snek Game Main File
+# Created by: isdood
+# Date: 2025-05-23
+
+# First define all our functions
+function spawn_food
+    set -g food_x (random 1 $GRID_WIDTH)
+    set -g food_y (random 1 $GRID_HEIGHT)
+    echo "🍎 Spawned food at ($food_x,$food_y)" > /dev/tty
+
+    # Ensure food doesn't spawn on snake
+    while contains "$food_x,$food_y" $snake_segments
+        set -g food_x (random 1 $GRID_WIDTH)
+        set -g food_y (random 1 $GRID_HEIGHT)
+        echo "🔄 Respawned food at ($food_x,$food_y)" > /dev/tty
+    end
+end
 
 function init_game
     echo "🎮 Initializing game..." > /dev/tty
@@ -30,13 +43,18 @@ function init_game
     set -g game_running true
     set -g score 0
 
-    # Initialize food
+    # Initialize food position
     spawn_food
 
     echo "✨ Game initialized!" > /dev/tty
 end
 
-# Initialize and start game
+# Now source our other files
+source (dirname (status filename))/engine/game_loop.fish
+source (dirname (status filename))/ui/renderer.fish
+source (dirname (status filename))/ui/input.fish
+
+# Start the game
 clear
 echo -en "\e[?25l" # Hide cursor
 init_game

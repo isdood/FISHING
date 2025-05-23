@@ -26,7 +26,7 @@ function render_frame
             # Check if current position contains snake
             if contains "$x,$y" $snake_segments
                 # Snake head
-                if test "$x" = "$snake_x" -a "$y" = "$snake_y"
+                if test "$x" = "$snake_x"; and test "$y" = "$snake_y"
                     set_color -o brgreen
                     echo -n "🟢"
                 else
@@ -34,8 +34,8 @@ function render_frame
                     set_color -o green
                     echo -n "██"
                 end
-            # Check if current position contains food
-            else if test $x = $food_x -a $y = $food_y
+            # Check if current position contains food (fixed test condition)
+            else if test "$x" = "$food_x"; and test "$y" = "$food_y"
                 set_color -o brred
                 echo -n "🍎"
             else
