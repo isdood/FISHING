@@ -1,7 +1,6 @@
 #!/usr/bin/env fish
 
 function cleanup_terminal
-    # Restore terminal settings
     stty "$ORIGINAL_STTY"
     echo -en "\e[?25h" # Show cursor
     clear
@@ -14,21 +13,22 @@ end
 
 function init_game
     echo -en "\e[H\e[2J" # Clear screen
-    echo "🎮 Initializing game..."
+    set_color brmagenta
+    echo "✨ Welcome to GLIMMERing Snek! ✨"
 
-    # Save original terminal settings and configure for game
+    # Save and configure terminal settings
     set -g ORIGINAL_STTY (stty -g)
-    stty -icanon -echo min 1 time 0
+    stty raw -echo min 0 time 0
 
     # Game dimensions
     set -g GRID_WIDTH 20
     set -g GRID_HEIGHT 10
 
-    # Initial snake position
+    # Initial snake position (middle of grid)
     set -g snake_x (math "floor($GRID_WIDTH/2)")
     set -g snake_y (math "floor($GRID_HEIGHT/2)")
 
-    # Direction and segments
+    # Initial direction and segments
     set -g direction "right"
     set -g snake_segments
     for i in (seq 3)
@@ -38,20 +38,27 @@ function init_game
     # Game state
     set -g game_running true
     set -g score 0
+    set -g last_update (date +%s)
+    set -g move_timer 0.2
 
+    # Initialize food
     spawn_food
+
+    # Initial render
+    render_frame
 end
 
-# Source dependencies after function definitions
+# Source our components
 source (dirname (status filename))/engine/game_loop.fish
 source (dirname (status filename))/ui/renderer.fish
 source (dirname (status filename))/ui/input.fish
 
+# Cleanup on exit
 function on_exit --on-event fish_exit
     cleanup_terminal
 end
 
-# Initialize and run game
+# Start the game!
 init_game
 start_game_loop
 cleanup_terminal
