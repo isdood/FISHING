@@ -1,9 +1,5 @@
 #!/usr/bin/env fish
 
-# 🌟 Snek Game Main File
-# Created by: isdood
-# Date: 2025-05-23
-
 source (dirname (status filename))/engine/game_loop.fish
 source (dirname (status filename))/ui/renderer.fish
 source (dirname (status filename))/ui/input.fish
@@ -20,10 +16,13 @@ function init_game
     # Initial direction (right)
     set -g direction "right"
 
-    # Snake body segments (starts with length 3)
+    # Initialize empty snake segments array
     set -g snake_segments
+
+    # Create initial snake body (length 3)
     for i in (seq 3)
-        set -a snake_segments "$snake_x",(math "$snake_y")
+        # Add segments to the left of the head
+        set -p snake_segments (math "$snake_x - $i + 1")","$snake_y
     end
 
     # Game state
@@ -38,13 +37,10 @@ function spawn_food
     # Simple food spawning (random position)
     set -g food_x (random 1 $GRID_WIDTH)
     set -g food_y (random 1 $GRID_HEIGHT)
+
+    # Ensure food doesn't spawn on snake
+    while contains "$food_x,$food_y" $snake_segments
+        set -g food_x (random 1 $GRID_WIDTH)
+        set -g food_y (random 1 $GRID_HEIGHT)
+    end
 end
-
-# Clear screen and start game
-clear
-echo -en "\e[?25l" # Hide cursor
-init_game
-start_game_loop
-
-# Clean up on exit
-echo -en "\e[?25h" # Show cursor
