@@ -1,41 +1,12 @@
 #!/usr/bin/env fish
 
-# 🌟 Snek Game Main File
-# Created by: isdood
-# Date: 2025-05-23
-
-# Debug output
-echo "✨ Starting Snek Game..."
-
-# Ensure we're in the correct directory
-set -l SCRIPT_DIR (dirname (status filename))
-cd $SCRIPT_DIR
-
-# Debug: Show current directory and files
-echo "📂 Current directory: "(pwd)
-echo "📁 Checking for required files..."
-
-# Check for required files
-for file in engine/game_loop.fish ui/renderer.fish ui/input.fish
-    if test -f $file
-        echo "✓ Found $file"
-    else
-        echo "❌ Missing required file: $file"
-        exit 1
-    end
-end
-
-# Source required files with error checking
-for file in engine/game_loop.fish ui/renderer.fish ui/input.fish
-    echo "📥 Loading $file..."
-    if not source $file
-        echo "❌ Failed to load $file"
-        exit 1
-    end
-end
+# Source required files
+source (dirname (status filename))/engine/game_loop.fish
+source (dirname (status filename))/ui/renderer.fish
+source (dirname (status filename))/ui/input.fish
 
 function init_game
-    echo "🎮 Initializing game..."
+    echo "🎮 Initializing game..." > /dev/tty
 
     # Set up initial game state
     set -g GRID_WIDTH 20
@@ -47,13 +18,11 @@ function init_game
 
     # Initial direction (right)
     set -g direction "right"
+    echo "🎯 Initial direction set to: $direction" > /dev/tty
 
-    # Initialize empty snake segments array
+    # Initialize snake segments
     set -g snake_segments
-
-    # Create initial snake body (length 3)
     for i in (seq 3)
-        # Add segments to the left of the head
         set -p snake_segments (math "$snake_x - $i + 1")","$snake_y
     end
 
@@ -61,37 +30,15 @@ function init_game
     set -g game_running true
     set -g score 0
 
-    # Initialize food position
+    # Initialize food
     spawn_food
 
-    echo "✨ Game initialized!"
+    echo "✨ Game initialized!" > /dev/tty
 end
-
-function spawn_food
-    # Simple food spawning (random position)
-    set -g food_x (random 1 $GRID_WIDTH)
-    set -g food_y (random 1 $GRID_HEIGHT)
-
-    # Ensure food doesn't spawn on snake
-    while contains "$food_x,$food_y" $snake_segments
-        set -g food_x (random 1 $GRID_WIDTH)
-        set -g food_y (random 1 $GRID_HEIGHT)
-    end
-end
-
-# Ensure files are executable
-chmod +x engine/game_loop.fish ui/renderer.fish ui/input.fish
-
-# Clear screen and hide cursor
-echo "🎨 Setting up display..."
-clear
-echo -en "\e[?25l"
 
 # Initialize and start game
-echo "🚀 Starting game loop..."
+clear
+echo -en "\e[?25l" # Hide cursor
 init_game
 start_game_loop
-
-# Clean up on exit
-echo -en "\e[?25h"
-echo "👋 Game ended!"
+echo -en "\e[?25h" # Show cursor

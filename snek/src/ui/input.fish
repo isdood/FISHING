@@ -1,45 +1,53 @@
 #!/usr/bin/env fish
 
 function check_input
-    # Read a single character without blocking
-    read -n 1 -t 0 key
+    # Debug: Show we're checking for input
+    echo "👀 Checking for input..." > /dev/tty
 
-    # Debug: Show current key press and direction
-    if test -n "$key"
-        echo "🎮 Key pressed: $key (Current direction: $direction)" > /dev/tty
-    end
+    # Try to read input without blocking
+    read -l -n 1 -t 0 key
+
+    # Debug: Show raw input received
+    echo "📝 Raw input received: '$key'" > /dev/tty
 
     # Store current direction before changing
     set -l new_direction $direction
+    echo "🎯 Current direction: $direction" > /dev/tty
 
-    switch $key
+    # Process key press
+    switch "$key"
         case q Q
+            echo "🚪 Quit key pressed" > /dev/tty
             set -g game_running false
+
         case w W
+            echo "⬆️ Up key pressed" > /dev/tty
             if test "$direction" != "down"
                 set new_direction "up"
-                echo "⬆️ Changing direction to up" > /dev/tty
             end
+
         case s S
+            echo "⬇️ Down key pressed" > /dev/tty
             if test "$direction" != "up"
                 set new_direction "down"
-                echo "⬇️ Changing direction to down" > /dev/tty
             end
+
         case a A
+            echo "⬅️ Left key pressed" > /dev/tty
             if test "$direction" != "right"
                 set new_direction "left"
-                echo "⬅️ Changing direction to left" > /dev/tty
             end
+
         case d D
+            echo "➡️ Right key pressed" > /dev/tty
             if test "$direction" != "left"
                 set new_direction "right"
-                echo "➡️ Changing direction to right" > /dev/tty
             end
     end
 
-    # Update global direction with debug output
+    # Debug: Show direction change
     if test "$new_direction" != "$direction"
+        echo "🔄 Direction changing from $direction to $new_direction" > /dev/tty
         set -g direction $new_direction
-        echo "🔄 Direction updated to: $direction" > /dev/tty
     end
 end
