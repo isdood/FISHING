@@ -1,10 +1,11 @@
 #!/usr/bin/env fish
 
 function check_input
-    # Read a single character without echo
-    read -n 1 -l input </dev/tty >/dev/null 2>&1
+    # Try to read a single character
+    read -n 1 -l input 2>/dev/null
 
-    if test $status -eq 0
+    # Only process if we got input
+    if test $status -eq 0; and test -n "$input"
         set -l new_direction $direction
 
         switch "$input"
@@ -26,8 +27,6 @@ function check_input
         end
 
         # Update direction if changed
-        if test "$new_direction" != "$direction"
-            set -g direction $new_direction
-        end
+        test "$new_direction" != "$direction"; and set -g direction $new_direction
     end
 end
