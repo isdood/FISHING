@@ -1,53 +1,44 @@
 #!/usr/bin/env fish
 
 function check_input
-    # Debug: Show we're checking for input
-    echo "👀 Checking for input..." > /dev/tty
-
-    # Try to read input without blocking
-    read -l -n 1 -t 0 key
-
-    # Debug: Show raw input received
-    echo "📝 Raw input received: '$key'" > /dev/tty
+    # Read a single character immediately
+    read -n 1 key
 
     # Store current direction before changing
     set -l new_direction $direction
-    echo "🎯 Current direction: $direction" > /dev/tty
 
-    # Process key press
     switch "$key"
-        case q Q
-            echo "🚪 Quit key pressed" > /dev/tty
+        case \177 q Q # 177 is backspace/delete
+            echo "🚪 Quitting game..." > /dev/tty
             set -g game_running false
+            return
 
-        case w W
-            echo "⬆️ Up key pressed" > /dev/tty
+        case w W A
             if test "$direction" != "down"
                 set new_direction "up"
+                echo "⬆️ Direction changed to up" > /dev/tty
             end
 
-        case s S
-            echo "⬇️ Down key pressed" > /dev/tty
+        case s S B
             if test "$direction" != "up"
                 set new_direction "down"
+                echo "⬇️ Direction changed to down" > /dev/tty
             end
 
-        case a A
-            echo "⬅️ Left key pressed" > /dev/tty
+        case a A D
             if test "$direction" != "right"
                 set new_direction "left"
+                echo "⬅️ Direction changed to left" > /dev/tty
             end
 
-        case d D
-            echo "➡️ Right key pressed" > /dev/tty
+        case d D C
             if test "$direction" != "left"
                 set new_direction "right"
+                echo "➡️ Direction changed to right" > /dev/tty
             end
     end
 
-    # Debug: Show direction change
     if test "$new_direction" != "$direction"
-        echo "🔄 Direction changing from $direction to $new_direction" > /dev/tty
         set -g direction $new_direction
     end
 end

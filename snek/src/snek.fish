@@ -2,15 +2,20 @@
 
 # 🌟 Snek Game Main File
 # Created by: isdood
-# Date: 2025-05-23
+# Date: 2025-05-23 13:51:51
 
-# First define all our functions
+function cleanup_terminal
+    # Restore terminal settings
+    stty $ORIGINAL_STTY
+    echo -en "\e[?25h" # Show cursor
+    clear
+end
+
 function spawn_food
     set -g food_x (random 1 $GRID_WIDTH)
     set -g food_y (random 1 $GRID_HEIGHT)
     echo "🍎 Spawned food at ($food_x,$food_y)" > /dev/tty
 
-    # Ensure food doesn't spawn on snake
     while contains "$food_x,$food_y" $snake_segments
         set -g food_x (random 1 $GRID_WIDTH)
         set -g food_y (random 1 $GRID_HEIGHT)
@@ -20,6 +25,12 @@ end
 
 function init_game
     echo "🎮 Initializing game..." > /dev/tty
+
+    # Save original terminal settings
+    set -g ORIGINAL_STTY (stty -g)
+
+    # Configure terminal for immediate input without echo
+    stty raw -echo
 
     # Set up initial game state
     set -g GRID_WIDTH 20
@@ -47,16 +58,22 @@ function init_game
     spawn_food
 
     echo "✨ Game initialized!" > /dev/tty
+
+    # Clear screen before starting
+    clear
 end
 
-# Now source our other files
+# Source our other files
 source (dirname (status filename))/engine/game_loop.fish
 source (dirname (status filename))/ui/renderer.fish
 source (dirname (status filename))/ui/input.fish
 
+# Set up cleanup on exit
+function on_exit --on-event fish_exit
+    cleanup_terminal
+end
+
 # Start the game
-clear
-echo -en "\e[?25l" # Hide cursor
 init_game
 start_game_loop
-echo -en "\e[?25h" # Show cursor
+cleanup_terminal
