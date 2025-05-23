@@ -1,44 +1,33 @@
 #!/usr/bin/env fish
 
 function check_input
-    # Read a single character immediately
-    read -n 1 key
+    # Read a single character without echo
+    read -n 1 -l input </dev/tty >/dev/null 2>&1
 
-    # Store current direction before changing
-    set -l new_direction $direction
+    if test $status -eq 0
+        set -l new_direction $direction
 
-    switch "$key"
-        case \177 q Q # 177 is backspace/delete
-            echo "🚪 Quitting game..." > /dev/tty
-            set -g game_running false
-            return
+        switch "$input"
+            case q Q
+                set -g game_running false
+                return
 
-        case w W A
-            if test "$direction" != "down"
-                set new_direction "up"
-                echo "⬆️ Direction changed to up" > /dev/tty
-            end
+            case w W
+                test "$direction" != "down"; and set new_direction "up"
 
-        case s S B
-            if test "$direction" != "up"
-                set new_direction "down"
-                echo "⬇️ Direction changed to down" > /dev/tty
-            end
+            case s S
+                test "$direction" != "up"; and set new_direction "down"
 
-        case a A D
-            if test "$direction" != "right"
-                set new_direction "left"
-                echo "⬅️ Direction changed to left" > /dev/tty
-            end
+            case a A
+                test "$direction" != "right"; and set new_direction "left"
 
-        case d D C
-            if test "$direction" != "left"
-                set new_direction "right"
-                echo "➡️ Direction changed to right" > /dev/tty
-            end
-    end
+            case d D
+                test "$direction" != "left"; and set new_direction "right"
+        end
 
-    if test "$new_direction" != "$direction"
-        set -g direction $new_direction
+        # Update direction if changed
+        if test "$new_direction" != "$direction"
+            set -g direction $new_direction
+        end
     end
 end
