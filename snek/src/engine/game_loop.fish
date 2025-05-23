@@ -2,6 +2,9 @@
 
 function start_game_loop
     while test "$game_running" = true
+        # Debug: Show current snake state
+        echo "🐍 Snake position: $snake_x,$snake_y (Direction: $direction)" > /dev/tty
+
         # Update game state
         update_game_state
 
@@ -21,15 +24,22 @@ function update_game_state
     set -l new_x $snake_x
     set -l new_y $snake_y
 
+    # Debug: Show movement calculation
+    echo "📍 Calculating movement from ($snake_x,$snake_y) going $direction" > /dev/tty
+
     switch $direction
         case "up"
             set new_y (math "$snake_y - 1")
+            echo "⬆️ Moving up to ($new_x,$new_y)" > /dev/tty
         case "down"
             set new_y (math "$snake_y + 1")
+            echo "⬇️ Moving down to ($new_x,$new_y)" > /dev/tty
         case "left"
             set new_x (math "$snake_x - 1")
+            echo "⬅️ Moving left to ($new_x,$new_y)" > /dev/tty
         case "right"
             set new_x (math "$snake_x + 1")
+            echo "➡️ Moving right to ($new_x,$new_y)" > /dev/tty
     end
 
     # Check for collisions with walls
@@ -58,6 +68,7 @@ function update_game_state
     if test $snake_x = $food_x -a $snake_y = $food_y
         set -g score (math "$score + 1")
         spawn_food
+        echo "🍎 Food eaten! Score: $score" > /dev/tty
     else
         # Remove the last segment (tail)
         set -e snake_segments[-1]
