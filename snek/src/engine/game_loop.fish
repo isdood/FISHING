@@ -2,10 +2,15 @@
 
 function start_game_loop
     while test "$game_running" = true
-        # Render first
+        # Clear any pending input
+        while read -l -t 0
+            read -l >/dev/null
+        end
+
+        # Render current state
         render_frame
 
-        # Then check input (will block briefly)
+        # Check for input
         check_input
 
         # Update game state
@@ -23,14 +28,17 @@ function update_game_state
 
     switch $direction
         case "up"
-            set new_y (math "$new_y - 1")
+            set new_y (math "$snake_y - 1")
         case "down"
-            set new_y (math "$new_y + 1")
+            set new_y (math "$snake_y + 1")
         case "left"
-            set new_x (math "$new_x - 1")
+            set new_x (math "$snake_x - 1")
         case "right"
-            set new_x (math "$new_x + 1")
+            set new_x (math "$snake_x + 1")
     end
+
+    # Debug movement
+    echo "🎯 Moving $direction from ($snake_x,$snake_y) to ($new_x,$new_y)" > /dev/tty
 
     # Check for collisions with walls
     if test $new_x -lt 1 -o $new_x -gt $GRID_WIDTH -o \
@@ -55,7 +63,7 @@ function update_game_state
     set -p snake_segments "$snake_x,$snake_y"
 
     # Remove tail unless food was eaten
-    if test $snake_x = $food_x -a $snake_y = $food_y
+    if test "$snake_x" = "$food_x"; and test "$snake_y" = "$food_y"
         set -g score (math "$score + 1")
         spawn_food
     else

@@ -4,58 +4,72 @@ function render_frame
     # Clear screen and move cursor to top-left
     echo -en "\e[H\e[2J"
 
-    # Draw sparkly title and score
+    # Draw title and score with extra GLIMMER ✨
     set_color -o brmagenta
-    echo "✨ Snek Game ✨"
-    echo (set_color brwhite)"Score: "(set_color bryellow)"$score"(set_color brmagenta)" ✨"
+    echo -n "✨ "
+    set_color -o brwhite
+    echo -n "Snek Game"
+    set_color -o brmagenta
+    echo " ✨"
+
+    set_color brwhite
+    echo -n "Score: "
+    set_color bryellow
+    echo -n "$score"
+    set_color brmagenta
+    echo " ✨"
     echo
 
-    # Draw top border with glimmer
+    # Draw top border with consistent spacing
     set_color -o blue
     echo -n "╔"
-    for i in (seq (math "$GRID_WIDTH * 2"))
-        echo -n "═"
+    for i in (seq $GRID_WIDTH)
+        echo -n "══"
     end
     echo "╗"
 
-    # Draw game grid (scaled up horizontally)
+    # Draw game grid
     for y in (seq $GRID_HEIGHT)
+        # Left border
         set_color -o blue
         echo -n "║"
+
+        # Grid contents
         for x in (seq $GRID_WIDTH)
-            # Check if current position contains snake
             if contains "$x,$y" $snake_segments
-                # Snake head
                 if test "$x" = "$snake_x"; and test "$y" = "$snake_y"
+                    # Snake head with GLIMMER
                     set_color -o brgreen
                     echo -n "🟢"
                 else
-                    # Snake body with gradient effect
+                    # Snake body segments
                     set_color -o green
                     echo -n "██"
                 end
-            # Check if current position contains food (fixed test condition)
             else if test "$x" = "$food_x"; and test "$y" = "$food_y"
+                # Food with extra sparkle
                 set_color -o brred
                 echo -n "🍎"
             else
-                set_color -o blue
+                # Empty space
                 echo -n "  "
             end
         end
+
+        # Right border
         set_color -o blue
         echo "║"
     end
 
-    # Draw bottom border with glimmer
+    # Draw bottom border
     set_color -o blue
     echo -n "╚"
-    for i in (seq (math "$GRID_WIDTH * 2"))
-        echo -n "═"
+    for i in (seq $GRID_WIDTH)
+        echo -n "══"
     end
     echo "╝"
 
-    # Show controls with sparkles
+    # Show controls with extra GLIMMER
     echo
     set_color brmagenta
     echo "✨ Controls ✨"
