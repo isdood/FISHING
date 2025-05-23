@@ -3,27 +3,27 @@
 function start_game_loop
     # Initialize movement timer
     set -g move_delay 0.2  # Seconds between moves
-    set -g last_move (date +%s%N)  # Get nanoseconds for more precise timing
+    set -g last_move (date +%s)
 
     while test "$game_running" = true
-        # Get current time in nanoseconds
-        set -l current_time (date +%s%N)
+        # Get current time
+        set -l current_time (date +%s)
 
-        # Check if it's time to move (convert nanoseconds to seconds)
-        set -l time_diff (math "($current_time - $last_move) / 1000000000")
+        # Calculate time difference properly
+        set -l time_diff (math "$current_time - $last_move")
 
         # Always render and check input
         render_frame
         check_input
 
-        # Move snake if enough time has passed
-        if test (math "$time_diff >= $move_delay") = 1
+        # Move snake on timer using proper fish comparison
+        if test "$time_diff" -ge 1
             update_game_state
             set -g last_move $current_time
         end
 
         # Small delay to prevent CPU overuse
-        sleep 0.05
+        sleep $move_delay
     end
 end
 
@@ -43,9 +43,9 @@ function update_game_state
             set new_x (math "$snake_x + 1")
     end
 
-    # Check wall collisions with extra GLIMMER ✨
-    if test $new_x -lt 1 -o $new_x -gt $GRID_WIDTH -o \
-           $new_y -lt 1 -o $new_y -gt $GRID_HEIGHT
+    # Check wall collisions using proper fish comparisons
+    if begin; test $new_x -lt 1; or test $new_x -gt $GRID_WIDTH; or \
+              test $new_y -lt 1; or test $new_y -gt $GRID_HEIGHT; end
         set -g game_running false
         game_over "✨ Bonk! You hit a wall! ✨"
         return
@@ -63,11 +63,11 @@ function update_game_state
     set -g snake_y $new_y
     set -p snake_segments "$snake_x,$snake_y"
 
-    # Handle food with extra sparkle ✨
+    # Handle food
     if test "$snake_x" = "$food_x"; and test "$snake_y" = "$food_y"
         set -g score (math "$score + 1")
         spawn_food
-        # Speed up slightly
+        # Speed up slightly with proper math
         set -g move_delay (math "max(0.05, $move_delay * 0.95)")
     else
         set -e snake_segments[-1]
