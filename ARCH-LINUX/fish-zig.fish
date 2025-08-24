@@ -1,3 +1,5 @@
+# Making "zig build" a bit prettier + output Zig version number (useful for pasting compiler output to AI models)
+
 function fish-zig --description 'Execute zig build with version info'
     # Display a separator line
     echo "╭───────────────────────────────────╮"
